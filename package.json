@@ -1,0 +1,24 @@
+{
+  "name": "gatsby-source-ravendb",
+  "version": "1.0.0",
+  "description": "A Gatsby source plugin to fetch data from RavenDB",
+  "authors": [
+    "Andrew Grass <andygrass92@gmail.com>"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"No build script setup\""
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin"
+  ],
+  "dependencies": {
+    "axios": "^0.27.2"
+  },
+  "peerDependencies": {
+    "gatsby": "^4.0.0"
+  },
+  "license": "MIT"
+}
