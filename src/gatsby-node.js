@@ -1,6 +1,6 @@
-const ravenClient = require('./src/raven-client');
-const ravenQueryRequest = require('./src/raven-query-request');
-const utils = require('./src/utils');
+const ravenClient = require('./raven-client');
+const ravenQueryRequest = require('./raven-query-request');
+const utils = require('./utils');
 
 exports.sourceNodes = async ({
   actions,
