@@ -36,7 +36,8 @@
   "scripts": {
     "build": "babel src --out-dir .",
     "prepare": "cross-env NODE_ENV=production npm run build",
-    "watch": "babel src --watch --out-dir ."
+    "watch": "babel src --watch --out-dir .",
+    "clean": "git clean -fx"
   },
   "engines": {
     "node": ">=14.15.0"
