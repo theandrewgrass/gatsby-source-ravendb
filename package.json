@@ -5,20 +5,40 @@
   "authors": [
     "Andrew Grass <andygrass92@gmail.com>"
   ],
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo \"No build script setup\""
+  "bugs": {
+    "url": "https://github.com/theandrewgrass/gatsby-source-ravendb/issues"
   },
-  "keywords": [
-    "gatsby",
-    "gatsby-plugin"
-  ],
   "dependencies": {
     "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.5",
+    "babel-preset-gatsby-package": "^2.17.0",
+    "cross-env": "^7.0.3"
   },
   "peerDependencies": {
     "gatsby": "^4.0.0"
   },
-  "license": "MIT"
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "gatsby-source-plugin",
+    "raven",
+    "ravendb"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theandrewgrass/gatsby-source-ravendb.git"
+  },
+  "scripts": {
+    "build": "babel src --out-dir .",
+    "prepare": "cross-env NODE_ENV=production npm run build",
+    "watch": "babel src --watch --out-dir ."
+  },
+  "engines": {
+    "node": ">=14.15.0"
+  }
 }
