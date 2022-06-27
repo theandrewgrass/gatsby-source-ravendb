@@ -30,8 +30,8 @@ module.exports = {
         serverUrl: `http://127.0.0.1:8080`, 
         databaseName: `Example`,
         collections: [ 
-          { name: "Products", node: "Product" },
-          { name: "Orders", node: "Order" },
+          { name: `Products`, node: `Product` },
+          { name: `Orders`, node: `Order` },
         ]
       }
     },
@@ -53,11 +53,11 @@ module.exports = {
         serverUrl: process.env.RAVEN_SERVER_URL, 
         databaseName: `Example`,
         collections: [ 
-          { name: "Products", node: "Product" },
-          { name: "Orders", node: "Order" },
+          { name: `Products`, node: `Product` },
+          { name: `Orders`, node: `Order` },
         ],
-        certificate: fs.readFileSync('./raven.crt'),
-        key: fs.readFileSync('./raven.key'),
+        certificate: fs.readFileSync(`./raven.crt`),
+        key: fs.readFileSync(`./raven.key`),
       },
     },
   ]
