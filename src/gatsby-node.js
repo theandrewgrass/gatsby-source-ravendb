@@ -25,7 +25,7 @@ exports.sourceNodes = async ({
   try {
     const client = ravenClient(serverUrl, certificate, key);
     
-    collections.forEach(async collection => {
+    for (const collection of collections) {
       const etagCacheKey = utils.getEtagCacheKey(collection.node);
       const documentsCacheKey = utils.getDocumentsCacheKey(collection.node);
 
@@ -42,11 +42,11 @@ exports.sourceNodes = async ({
         await cache.set(documentsCacheKey, documents);
       }
 
-      documents.forEach(document => {
+      await Promise.all(documents.map(document => {
         const documentId = utils.getDocumentId(document);
         const nodeId = utils.getNodeId(collection.node, document);
-
-        createNode({
+        
+        return createNode({
           ...document,
           _id: documentId,
           id: createNodeId(nodeId),
@@ -55,11 +55,11 @@ exports.sourceNodes = async ({
           internal: {
             type: collection.node,
             content: JSON.stringify(document),
-            contentDigest: createContentDigest(document),
-          },
+            contentDigest: createContentDigest(document)
+          }
         });
-      });
-    });
+      }));
+    }
   } catch (err) {
     reporter.error(`Something went wrong while sourcing data from RavenDB.`, err);
 
