@@ -33,7 +33,7 @@ exports.sourceNodes = async ({
       const queryRequest = ravenQueryRequest(databaseName, collection.name, cachedEtag);
 
       const response = await client.request(queryRequest);
-      const { data: { Results: documents, ResultEtag: etag } } = response;
+      let { data: { Results: documents, ResultEtag: etag } } = response;
 
       if (cachedEtag && cachedEtag === etag) {
         documents = await cache.get(documentsCacheKey);
