@@ -2,3 +2,4 @@ src
 .babelrc
 *.tgz
 __tests__
+CHANGELOG.md
