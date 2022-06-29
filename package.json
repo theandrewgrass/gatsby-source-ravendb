@@ -15,7 +15,8 @@
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.18.5",
     "babel-preset-gatsby-package": "^2.17.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "jest": "^28.1.1"
   },
   "peerDependencies": {
     "gatsby": "^4.0.0"
@@ -37,6 +38,7 @@
     "build": "babel src --out-dir .",
     "prepare": "cross-env NODE_ENV=production npm run build",
     "watch": "babel src --watch --out-dir .",
+    "test": "jest",
     "clean": "git clean -fx"
   },
   "engines": {
