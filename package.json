@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-ravendb",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Gatsby source plugin to fetch data from RavenDB",
   "authors": [
     "Andrew Grass <andygrass92@gmail.com>"
