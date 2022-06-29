@@ -26,12 +26,14 @@ module.exports = (serverUrl, certificate, key) => {
   }
 
   function inititialize() {
-    if (certificate)
-    {
+    if (certificate && key) {
       setSecureClient();
-    }
-    else {
+    } 
+    else if (!certificate && !key) {
       setClient();
+    } 
+    else {
+      throw new Error('Cannot create a secure client without both a certificate and key');
     }
   }
 
