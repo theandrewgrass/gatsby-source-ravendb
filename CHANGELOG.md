@@ -4,9 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 *nothing new coming up*
 
+---
+
+## [1.0.2] - 2022-06-29
+### Fixed
+- Resolved issue where would fail to build if trying to fetch documents from cache
+
+---
+
 ## [1.0.1] - 2022-06-28
+>*(deleted from npm because other non-essential files were accidentally committed)*
 ### Fixed
 - Resolved issue where Gatsby build process would continue without waiting for nodes to finish being created
+
+---
 
 ## [1.0.0] - 2022-06-27
 ### Added
