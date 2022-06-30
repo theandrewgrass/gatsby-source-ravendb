@@ -29,22 +29,34 @@ exports.sourceNodes = async ({
       const etagCacheKey = utils.getEtagCacheKey(collection.node);
       const documentsCacheKey = utils.getDocumentsCacheKey(collection.node);
 
-      const cachedEtag = await cache.get(etagCacheKey);
-      const queryRequest = ravenQueryRequest(databaseName, collection.name, cachedEtag);
+      // const cachedEtag = await cache.get(etagCacheKey);
+
+      const ravenQueryRequestOptions = {
+        databaseName: databaseName,
+        collectionName: collection.name,
+        includes: collection.includes,
+        // etag: cachedEtag,
+      };
+      const queryRequest = ravenQueryRequest(ravenQueryRequestOptions);
 
       const response = await client.request(queryRequest);
-      let { data: { Results: documents, ResultEtag: etag } } = response;
+      let { data: { Results: documents, Includes: includes, ResultEtag: etag } } = response;
 
-      if (cachedEtag && cachedEtag === etag) {
-        documents = await cache.get(documentsCacheKey);
-      } else {
-        await cache.set(etagCacheKey, etag);
-        await cache.set(documentsCacheKey, documents);
-      }
+      // if (cachedEtag && cachedEtag === etag) {
+      //   documents = await cache.get(documentsCacheKey);
+      // } else {
+      //   await cache.set(etagCacheKey, etag);
+      //   await cache.set(documentsCacheKey, documents);
+      // }
 
       await Promise.all(documents.map(document => {
         const documentId = utils.getDocumentId(document);
         const nodeId = utils.getNodeId(collection.node, document);
+
+        for (const include of collection.includes) {
+          const includeId = document[include];
+          document[include] = includes[includeId];
+        }
         
         return createNode({
           ...document,

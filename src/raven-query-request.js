@@ -1,10 +1,10 @@
-module.exports = (databaseName, collectionName, etag) => {
+module.exports = ({ databaseName, collectionName, includes, etag }) => {
   let query;
 
   function inititialize() {
     const url = `/databases/${databaseName}/queries`;
     const payload = {
-      Query: `from ${collectionName}`,
+      Query: buildQueryString(),
     };
     const headers = {
       ...(etag && { 'If-None-Match': etag })
@@ -16,6 +16,16 @@ module.exports = (databaseName, collectionName, etag) => {
       data: payload,
       headers: headers,
     };
+  }
+
+  function buildQueryString() {
+    let queryString = `from ${collectionName}`;
+
+    if (includes) {
+      queryString += ` include ${includes.join(', ')}`;
+    }
+
+    return queryString;
   }
 
   inititialize();
