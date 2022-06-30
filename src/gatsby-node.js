@@ -22,55 +22,113 @@ exports.sourceNodes = async ({
   let activity = reporter.activityTimer(`Creating nodes from RavenDB data`);
   activity.start();
 
-  try {
-    const client = ravenClient(serverUrl, certificate, key);
-    
-    for (const collection of collections) {
-      const etagCacheKey = utils.getEtagCacheKey(collection.node);
-      const documentsCacheKey = utils.getDocumentsCacheKey(collection.node);
+  const loadEtagFromCache = async (collectionNode) => {
+    const cacheKey = utils.getEtagCacheKey(collectionNode);
+    const cachedEtag = await cache.get(cacheKey);
 
-      // const cachedEtag = await cache.get(etagCacheKey);
+    return cachedEtag;
+  };
 
+  const saveEtagToCache = async (collectionNode, etag) => {
+    const cacheKey = utils.getEtagCacheKey(collectionNode);
+    await cache.set(cacheKey, etag);
+  };
+
+  const saveDocumentsToCache = async (collectionNode, documents) => {
+    const cacheKey = utils.getDocumentsCacheKey(collectionNode);
+    await cache.set(cacheKey, documents);
+  };
+
+  const loadDocuments = async (client, databaseName, collection, etag) => {
+    const buildRavenQueryRequest = (databaseName, collection, etag) => {
       const ravenQueryRequestOptions = {
         databaseName: databaseName,
         collectionName: collection.name,
         includes: collection.includes,
-        // etag: cachedEtag,
+        etag: cachedEtag,
       };
       const queryRequest = ravenQueryRequest(ravenQueryRequestOptions);
+  
+      return queryRequest;
+    }
+    
+    const queryRequest = buildRavenQueryRequest(databaseName, collection, etag);
+    
+    const response = await client.request(queryRequest);
 
-      const response = await client.request(queryRequest);
-      let { data: { Results: documents, Includes: includes, ResultEtag: etag } } = response;
+    return response;
+  };
 
-      // if (cachedEtag && cachedEtag === etag) {
-      //   documents = await cache.get(documentsCacheKey);
-      // } else {
-      //   await cache.set(etagCacheKey, etag);
-      //   await cache.set(documentsCacheKey, documents);
-      // }
+  const canLoadDocumentsFromCache = (cachedEtag, etag) => {
+    return cachedEtag && cachedEtag === etag;
+  }
 
-      await Promise.all(documents.map(document => {
-        const documentId = utils.getDocumentId(document);
-        const nodeId = utils.getNodeId(collection.node, document);
+  const mapIncludesToDocuments = (documents, includes, collectionIncludes) => {
+    if (!collectionIncludes) {
+      return documents;
+    }
 
-        for (const include of collection.includes) {
-          const includeId = document[include];
-          document[include] = includes[includeId];
+    documents.forEach(document => {
+      collectionIncludes.forEach(include => {
+        if (document[include]) {
+          document[include] = includes[document[include]];
         }
-        
-        return createNode({
-          ...document,
-          _id: documentId,
-          id: createNodeId(nodeId),
-          parent: null,
-          children: [],
-          internal: {
-            type: collection.node,
-            content: JSON.stringify(document),
-            contentDigest: createContentDigest(document)
-          }
-        });
-      }));
+      });
+    });
+
+    return documents;
+  };
+
+  const collectDocuments = async (client, databaseName, collection) => {
+    const cachedEtag = await loadEtagFromCache(collection.node);
+    const response = await loadDocuments(client, databaseName, collection, cachedEtag);
+
+    let { 
+      data: {
+        Results: documents,
+        Includes: includes,
+        Etag: etag,
+      }
+    } = response;
+
+    if (canLoadDocumentsFromCache(cachedEtag, etag)) {
+      documents = await loadDocumentsFromCache(collection.node);
+    }
+    else {
+      mapIncludesToDocuments(documents, includes, collection.includes);
+      await saveEtagToCache(collection.node, etag);
+      await saveDocumentsToCache(collection.node, documents);
+    }
+
+    return documents;
+  };
+
+  const createNodes = (documents, collection) => {
+    return Promise.all(documents.map(document => {
+      const documentId = utils.getDocumentId(document);
+      const nodeId = utils.getNodeId(collection.node, document);
+      
+      return createNode({
+        ...document,
+        _id: documentId,
+        id: createNodeId(nodeId),
+        parent: null,
+        children: [],
+        internal: {
+          type: collection.node,
+          content: JSON.stringify(document),
+          contentDigest: createContentDigest(document)
+        }
+      });
+    }));
+  }
+
+  try {
+    const client = ravenClient(serverUrl, certificate, key);
+    
+    for (const collection of collections) {
+      const documents = await collectDocuments(client, databaseName, collection);
+      await createNodes(documents, collection);
     }
   } catch (err) {
     reporter.error(`Something went wrong while sourcing data from RavenDB.`, err);
