@@ -1,42 +1,66 @@
 const https = require('https');
 const axios = require('axios');
+const ravenQueryRequest = require('./raven-query-request');
 
-module.exports = (serverUrl, certificate, key) => {
-  let client;
+module.exports = class RavenClient {
+  #client;
+  #serverUrl;
+  #certificate;
+  #key;
 
-  function setSecureClient() {
+  #setClient() {
+    this.#client = axios.create({
+      baseURL: this.#serverUrl
+    });
+  }
+  
+  #setSecureClient() {
     const options = {
       rejectUnauthorized: true,
-      cert: certificate,
-      key: key,
+      cert: this.#certificate,
+      key: this.#key,
     };
 
     const httpsAgent = new https.Agent(options);
 
-    client = axios.create({ 
-      baseURL: serverUrl,
+    this.#client = axios.create({ 
+      baseURL: this.#serverUrl,
       httpsAgent: httpsAgent
     });
   }
-
-  function setClient() {
-    client = axios.create({
-      baseURL: serverUrl
-    });
-  }
-
-  function inititialize() {
-    if (certificate && key) {
-      setSecureClient();
+  
+  #initialize() {
+    if (this.#certificate && this.#key) {
+      this.#setSecureClient();
     } 
-    else if (!certificate && !key) {
-      setClient();
+    else if (!this.#certificate && !this.#key) {
+      this.#setClient();
     } 
     else {
       throw new Error('Cannot create a secure client without both a certificate and key');
     }
   }
+  
+  constructor({ serverUrl, certificate, key }) {
+    this.#serverUrl = serverUrl;
+    this.#certificate = certificate;
+    this.#key = key;
 
-  inititialize();
-  return client;
-};
+    this.#initialize();
+  }
+
+  async loadDocuments(databaseName, collection, etag) {
+    const requestOptions = {
+      databaseName: databaseName,
+      collectionName: collection.name,
+      includes: collection.includes,
+      etag: etag,
+    };
+
+    const queryRequest = ravenQueryRequest(requestOptions);
+
+    const response = await this.#client.request(queryRequest);
+
+    return response;
+  }
+}

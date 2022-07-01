@@ -1,53 +1,125 @@
+const axios = require('axios');
+const https = require('https');
 const ravenClient = require('../src/raven-client');
 
+jest.mock('axios');
+jest.mock('https');
+
 describe('raven-client', () => {
-  it('should return a client', () => {
-    const serverUrl = 'serverUrl';
-    const client = ravenClient(serverUrl);
-
-    expect(client)
-      .toBeDefined();
+  beforeEach(() =>  {
+    jest.resetModules();
   });
 
-  it('should return a client with the provided baseURL', () => {
-    const serverUrl = 'serverUrl';
-    const client = ravenClient(serverUrl);
+  test('should create a regular axios client if no certificate and key are provided', () => {
+    // Arrange
+    const options = {
+      serverUrl: 'serverUrl',
+    };
 
-    expect(client.defaults.baseURL)
-      .toEqual(serverUrl);
-  });
-
-  test('should return a regular client if no certificate and key are provided', () => {
-    const serverUrl = 'serverUrl';
-    const client = ravenClient(serverUrl);
+    // Act
+    new ravenClient(options);
     
-    expect(client.defaults.httpsAgent)
-      .toBeUndefined();
+    // Assert
+    expect(axios.create)
+      .toHaveBeenCalledWith({ 
+        baseURL: options.serverUrl,
+        httpsAgent: undefined
+      });
   });
 
-  test('should return a secure client if given a certificate and key', () => {
-    const serverUrl = 'serverUrl';
-    const certificate = 'certificate';
-    const key = 'key';
-    const client = ravenClient(serverUrl, certificate, key);
+  test('should create a secure axios client if certificate and key are provided', () => {
+    // Arrange
+    const options = {
+      serverUrl: 'serverUrl',
+      certificate: 'certificate',
+      key: 'key',
+    };
 
-    expect(client.defaults.httpsAgent)
-      .toBeDefined();
+    // Act
+    new ravenClient(options);
+
+    // Assert
+    expect(axios.create)
+      .toHaveBeenCalledWith({ 
+        baseURL: options.serverUrl,
+        httpsAgent: expect.any(https.Agent)
+      });
+    
+    expect(https.Agent)
+      .toHaveBeenCalledWith({
+        rejectUnauthorized: true,
+        cert: options.certificate,
+        key: options.key,
+      });
   });
 
   test('should throw an error if a certificate is provided without a key', () => {
-    const serverUrl = 'serverUrl';
-    const certificate = 'certificate';
+    // Arrange
+    const options = {
+      serverUrl: 'serverUrl',
+      certificate: 'certificate',
+    };
 
-    expect(() => { ravenClient(serverUrl, certificate); })
+    // Act/Assert
+    expect(() => { new ravenClient(options); })
       .toThrowError();
   });
 
   test('should throw an error if a key is provided without a certificate', () => {
-    const serverUrl = 'serverUrl';
-    const key = 'key';
+    // Arrange
+    const options = {
+      serverUrl: 'serverUrl',
+      key: 'key',
+    };
 
-    expect(() => { ravenClient(serverUrl, undefined, key); })
+    // Act/Assert
+    expect(() => { new ravenClient(options); })
       .toThrowError();
+  });
+
+  test('loadDocuments should make a request using the regular axios client', async () => {
+    // Arrange
+    const clientOptions = {
+      serverUrl: 'serverUrl',
+    };
+
+    const databaseName = 'databaseName';
+    const collection = { name: 'collectionName', includes: ['include1', 'include2'] };
+    const etag = 'etag';
+    
+    axios.create.mockReturnThis();
+    axios.request.mockReturnValue({ data: 'data' });
+    const client = new ravenClient(clientOptions);
+
+    // Act
+    const response = await client.loadDocuments(databaseName, collection, etag);
+
+    // Assert
+    expect(response)
+      .toEqual({ data: 'data' });
+  });
+
+  test('loadDocuments should get expected response using the secure axios client', async () => {
+    // Arrange
+    const clientOptions = {
+      serverUrl: 'serverUrl',
+      certificate: 'certificate',
+      key: 'key',
+    };
+
+    const databaseName = 'databaseName';
+    const collection = { name: 'collectionName', includes: ['include1', 'include2'] };
+    const etag = 'etag';
+    
+    axios.create.mockReturnThis();
+    axios.request.mockReturnValue({ data: 'data' });
+    const client = new ravenClient(clientOptions);
+
+    // Act
+    const response = await client.loadDocuments(databaseName, collection, etag);
+
+    // Assert
+    expect(response)
+      .toEqual({ data: 'data' });
   });
 });
