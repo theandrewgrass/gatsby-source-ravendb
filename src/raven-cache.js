@@ -18,11 +18,11 @@ class RavenCache {
    *
    * @async
    * @param {String} collectionNode - The name of the collection node for which to load the etag.
-   * @return {String} The etag for the given collection. 
+   * @return {Promise<String>} The etag for the given collection. 
    * @memberof RavenCache
    */
   async loadEtag(collectionNode) {
-    const cacheKey = utils.getEtagCacheKey(collectionNode);
+    const cacheKey = this.getEtagCacheKey(collectionNode);
     const cachedEtag = await this.#cache.get(cacheKey);
 
     return cachedEtag;
@@ -37,7 +37,7 @@ class RavenCache {
    * @memberof RavenCache
    */
   async saveEtag(collectionNode, etag) {
-    const cacheKey = utils.getEtagCacheKey(collectionNode);
+    const cacheKey = this.getEtagCacheKey(collectionNode);
     await this.#cache.set(cacheKey, etag);
   }
 
@@ -50,7 +50,7 @@ class RavenCache {
    * @memberof RavenCache
    */
   async loadDocuments(collectionNode) {
-    const cacheKey = utils.getDocumentsCacheKey(collectionNode);
+    const cacheKey = this.getDocumentsCacheKey(collectionNode);
     const cachedDocuments = await this.#cache.get(cacheKey);
 
     return cachedDocuments;
@@ -65,7 +65,7 @@ class RavenCache {
    * @memberof RavenCache
    */
   async saveDocuments(collectionNode, documents) {
-    const cacheKey = utils.getDocumentsCacheKey(collectionNode);
+    const cacheKey = this.getDocumentsCacheKey(collectionNode);
     await this.#cache.set(cacheKey, documents);
   }
 
@@ -74,14 +74,22 @@ class RavenCache {
    * whether the etag has changed since it was last cached.
    * 
    * @param {String} etag - The etag for the given collection.
-   * @return {Boolean} Whether the cached documents are up-to-date.
+   * @return {Promise<Boolean>} Whether the cached documents are up-to-date.
    * @memberof RavenCache
    */
-  async hasUpToDateDocuments(etag) {
-    const cacheKey = utils.getEtagCacheKey(collectionNode);
+  async hasUpToDateDocuments(collectionNode, etag) {
+    const cacheKey = this.getEtagCacheKey(collectionNode);
     const cachedEtag = await this.#cache.get(cacheKey);
 
     return cachedEtag && cachedEtag === etag;
+  }
+
+  getEtagCacheKey(collectionNode) {
+    return `${collectionNode}-etag`;
+  }
+
+  getDocumentsCacheKey(collectionNode) {
+    return `${collectionNode}-documents`;
   }
 }
 

@@ -1,26 +1,6 @@
 const utils = require('../src/utils');
 
 describe('utils', () => {
-  test('getEtagCacheKey should return the correct key', () => {
-    const collectionNode = 'collectionNode';
-    const key = utils.getEtagCacheKey(collectionNode);
-    
-    const expectedKey = `${collectionNode}-etag`;
-
-    expect(key)
-      .toEqual(expectedKey);
-  });
-
-  test('getDocumentsCacheKey should return the correct key', () => {
-    const collectionNode = 'collectionNode';
-    const key = utils.getDocumentsCacheKey(collectionNode);
-    
-    const expectedKey = `${collectionNode}-documents`;
-
-    expect(key)
-      .toEqual(expectedKey);
-  });
-
   test('getDocumentId should return the given document id', () => {
     const document = {
       '@metadata': {
