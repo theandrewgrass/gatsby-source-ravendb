@@ -46,7 +46,7 @@ class RavenCache {
    * 
    * @async
    * @param {String} collectionNode - The name of the collection node for which to load the documents.
-   * @return {Arry<Object>} The documents for the given collection.
+   * @return {Promise<Array<Object>>} The documents for the given collection.
    * @memberof RavenCache
    */
   async loadDocuments(collectionNode) {
