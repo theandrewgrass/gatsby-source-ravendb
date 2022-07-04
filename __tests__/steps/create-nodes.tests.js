@@ -1,4 +1,4 @@
-const createNodes = require('../src/steps/create-nodes');
+const createNodes = require('../../src/steps/create-nodes');
 
 describe('create-nodes', () => {  
   test('should run createNode for every document with expected parameters', async() => {

@@ -1,9 +1,9 @@
-const ravenClient = require('../src/raven-client');
-const ravenCache = require('../src/raven-cache');
-const collectDocuments = require('../src/steps/collect-documents');
+const ravenClient = require('../../src/raven-client');
+const ravenCache = require('../../src/raven-cache');
+const collectDocuments = require('../../src/steps/collect-documents');
 
-jest.mock('../src/raven-client');
-jest.mock('../src/raven-cache');
+jest.mock('../../src/raven-client');
+jest.mock('../../src/raven-cache');
 
 describe('collect-documents', () => {
   test('should create raven client with given options', async () => {
