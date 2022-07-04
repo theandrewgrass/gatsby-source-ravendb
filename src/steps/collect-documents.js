@@ -25,7 +25,7 @@ const collectDocuments = async (options) => {
     }
   } = response;
   
-  if (cache.hasUpToDateDocuments(etag)) {
+  if (cache.hasUpToDateDocuments(collection.node, etag)) {
     documents = await cache.loadDocuments(collection.node);
   }
   else {
