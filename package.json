@@ -39,7 +39,7 @@
     "prepare": "cross-env NODE_ENV=production npm run build",
     "watch": "babel src --watch --out-dir .",
     "test": "jest",
-    "clean": "git clean -fx"
+    "clean": "git clean -xfd -e node_modules"
   },
   "engines": {
     "node": ">=14.15.0"
