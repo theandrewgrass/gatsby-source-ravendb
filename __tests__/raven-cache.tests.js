@@ -71,7 +71,19 @@ describe('raven-cache', () => {
     const isUpToDate = await cache.hasUpToDateDocuments('node', 'etag');
 
     expect(isUpToDate)
-      .toEqual(true);
+      .toBeTruthy();
+  });
+
+  test('should return false if given etag does not match cached etag', async () => {
+    const gatsbyCache = {
+      get: jest.fn(() => Promise.resolve(undefined)),
+    };
+    const cache = new ravenCache({ cache: gatsbyCache });
+
+    const isUpToDate = await cache.hasUpToDateDocuments('node', 'etag');
+
+    expect(isUpToDate)
+      .toBeFalsy();
   });
 
   test('getEtagCacheKey should return the correct key', () => {
