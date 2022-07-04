@@ -11,7 +11,7 @@ const collectDocuments = async (options) => {
     cache: gatsbyCache,
   } = options;
 
-  const client = new ravenClient(serverUrl, certificate, key);
+  const client = new ravenClient({ serverUrl, certificate, key });
   const cache = new ravenCache({ cache: gatsbyCache });
 
   const cachedEtag = await cache.loadEtag(collection.node);
@@ -21,11 +21,11 @@ const collectDocuments = async (options) => {
     data: {
       Results: documents,
       Includes: includes,
-      Etag: etag,
+      ResultEtag: etag,
     }
   } = response;
   
-  if (cache.hasUpToDateDocuments(collection.node, etag)) {
+  if (await cache.hasUpToDateDocuments(collection.node, etag)) {
     documents = await cache.loadDocuments(collection.node);
   }
   else {

@@ -1,6 +1,11 @@
 const utils = require('../utils');
 
 const createNodes = ({ createNode, createNodeId, createContentDigest, documents, collection }) => {
+  if (!documents)
+  {
+    return;
+  }
+  
   return Promise.all(documents.map(document => {
     const documentId = utils.getDocumentId(document);
     const nodeId = utils.getNodeId(collection.node, document);
