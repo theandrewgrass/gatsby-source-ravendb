@@ -1,4 +1,5 @@
 const createNodes = require('../../src/steps/create-nodes');
+const createDocument = require('../helpers/create-document');
 
 describe('create-nodes', () => {  
   test('should run createNode for every document with expected parameters', async() => {
@@ -9,8 +10,8 @@ describe('create-nodes', () => {
     };
     
     const documents = [
-      { '@metadata': { '@id': '123' } },
-      { '@metadata': { '@id': '456' } },
+      createDocument('id1'),
+      createDocument('id2'),
     ];
     
     const createNode = jest.fn();
@@ -45,7 +46,8 @@ describe('create-nodes', () => {
         },
       };
 
-      expect(createNode).toHaveBeenCalledWith(expectedCreateNodeParams);
+      expect(createNode)
+        .toHaveBeenCalledWith(expectedCreateNodeParams);
     });
   });
 });
