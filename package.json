@@ -21,6 +21,11 @@
   "peerDependencies": {
     "gatsby": "^4.0.0"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/__tests__/helpers/"
+    ]
+  },
   "keywords": [
     "gatsby",
     "gatsby-plugin",
