@@ -1,83 +1,87 @@
 const ravenQueryRequest = require('../src/raven-query-request');
 
 describe('raven-query-request', () => {
-  it('should return a query', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
-    };
-    const query = ravenQueryRequest(queryOptions);
+  const basicOptions = {
+    databaseName: 'databaseName',
+    collectionName: 'collectionName',
+  };
 
+  it('should return a query', () => {
+    // Act
+    const query = ravenQueryRequest(basicOptions);
+
+    // Assert
     expect(query)
       .toBeDefined();
   });
 
   it('should return a query that has the http method set as post', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
-    };
-    const query = ravenQueryRequest(queryOptions);
+    // Act
+    const query = ravenQueryRequest(basicOptions);
 
+    // Assert
     const expectedHttpMethod = 'post';
-
+    
     expect(query.method)
       .toEqual(expectedHttpMethod);
   });
 
   it('should return a query with the the correct url', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
-    };
-    const query = ravenQueryRequest(queryOptions);
+    // Act
+    const query = ravenQueryRequest(basicOptions);
 
-    const expectedQueryUrl = `/databases/${queryOptions.databaseName}/queries`;
-
+    // Assert
+    const expectedQueryUrl = `/databases/${basicOptions.databaseName}/queries`;
+    
     expect(query.url)
       .toEqual(expectedQueryUrl);
   });
 
   it('should return a query with the correct data', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
-    };
-    const query = ravenQueryRequest(queryOptions);
+    // Act
+    const query = ravenQueryRequest(basicOptions);
 
+    // Assert
     const expectedPayload = {
-      Query: `from ${queryOptions.collectionName}`,
+      Query: `from ${basicOptions.collectionName}`,
     };
-
+    
     expect(query.data)
       .toEqual(expectedPayload);
   });
 
   it('should add the If-None-Match header with the provided etag', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
+    // Arrange
+    const options = {
+      ...basicOptions,
       etag: 'etag',
     };
-    const query = ravenQueryRequest(queryOptions);
 
+    // Act
+    const query = ravenQueryRequest(options);
+
+    
+    // Assert
     const expectedHeaders = {
-      'If-None-Match': queryOptions.etag,
+      'If-None-Match': options.etag,
     };
-
+    
     expect(query.headers)
       .toEqual(expectedHeaders);
   });
 
   it('should have a query string containing includes if includes option provided', () => {
-    const queryOptions = {
-      databaseName: 'databaseName',
-      collectionName: 'collectionName',
+    // Arrange
+    const options = {
+      ...basicOptions,
       includes: ['include1', 'include2'],
     };
-    const query = ravenQueryRequest(queryOptions);
 
-    const expectedQueryString = `from ${queryOptions.collectionName} include ${queryOptions.includes[0]}, ${queryOptions.includes[1]}`;
+    // Act
+    const query = ravenQueryRequest(options);
+
+    // Assert
+    const expectedQueryString = `from ${options.collectionName} include ${options.includes[0]}, ${options.includes[1]}`;
 
     expect(query.data.Query)
       .toEqual(expectedQueryString);
