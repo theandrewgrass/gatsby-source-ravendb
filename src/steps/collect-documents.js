@@ -30,7 +30,10 @@ const collectDocuments = async (options) => {
     documents = await cache.loadDocuments(collection.node);
   }
   else {
-    mapIncludes(documents, includes, collection.includes);
+    if (collection.includes) {
+      mapIncludes(documents, includes, collection.includes);
+    }
+    
     await cache.saveEtag(collection.node, etag);
     await cache.saveDocuments(collection.node, documents);
   }

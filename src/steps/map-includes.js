@@ -8,10 +8,6 @@
  * @returns {Array<Object>} - documents with relevant includes mapped to them
  */
 const mapIncludes = (documents, includes, collectionIncludes) => {
-  if (!collectionIncludes) {
-    return documents;
-  }
-
   documents.forEach(document => {
     collectionIncludes.forEach(collectionInclude => {
       const includeParts = collectionInclude.split(/(\[])?(\.)/).filter(item => item);
