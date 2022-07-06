@@ -143,7 +143,7 @@ describe('collect-documents', () => {
       ...basicOptions,
       collection: {
         node: 'node',
-        includes: [ 'SomeInclude', 'AnotherInclude' ],
+        includes: [ 'SomeProperty', 'SomeNested.Property', 'SomeCollection[].Property', 'SomeCollection[].Nested.Property' ],
       },
       cache: {}
     };
@@ -157,12 +157,18 @@ describe('collect-documents', () => {
     ravenCache.mockImplementation(() => ravenCacheMock);
 
     const loadedDocuments = [
-      createDocument('id1', { SomeInclude: 'someIncludeId', AnotherInclude: 'anotherIncludeId' }),
+      createDocument('id1', { 
+        SomeProperty: 'somePropertyId', 
+        SomeNested: { Property: 'someNestedPropertyId' },
+        SomeCollection: [ { Property: 'someCollectionPropertyId' }, { Nested: { Property: 'someNestedCollectionPropertyId' } } ]
+      }),
     ];
 
     const loadedIncludes = {
-      someIncludeId: createDocument('someIncludeId', { someProperty: 'someValue' }),
-      anotherIncludeId: createDocument('anotherIncludeId', { anotherProperty: 'anotherValue' }),
+      somePropertyId: createDocument('somePropertyId', { someProperty: 'someValue' }),
+      someNestedPropertyId: createDocument('someNestedPropertyId', { someProperty: 'nestedValue' }),
+      someCollectionPropertyId: createDocument('someCollectionPropertyId', { someProperty: 'collectionValue' }),
+      someNestedCollectionPropertyId: createDocument('someNestedCollectionPropertyId', { someProperty: 'nestedCollectionValue' }),
     };
     
     const ravenClientMock = {
@@ -177,9 +183,17 @@ describe('collect-documents', () => {
     expect(documents)
       .toHaveLength(1);
 
-    expect(documents[0].SomeInclude)
-      .toEqual(loadedIncludes.someIncludeId);
+    const document = documents[0];
+
+    expect(document.SomeProperty)
+      .toEqual(loadedIncludes.somePropertyId);
     expect(documents[0].AnotherInclude)
       .toEqual(loadedIncludes.anotherIncludeId);
+    expect(document.SomeNested.Property)
+      .toEqual(loadedIncludes.someNestedPropertyId);
+    expect(document.SomeCollection[0].Property)
+      .toEqual(loadedIncludes.someCollectionPropertyId);
+    expect(document.SomeCollection[1].Nested.Property)
+      .toEqual(loadedIncludes.someNestedCollectionPropertyId);
   });
 });
