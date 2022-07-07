@@ -39,8 +39,6 @@ const mapIncludes = (documents, includes, collectionIncludes) => {
       mapIncludesFromParts(includeParts, document);
     });
   });
-
-  return documents;
 }
 
 module.exports = mapIncludes;
