@@ -2,24 +2,19 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-*nothing new coming up*
+### New features
+- [#2](https://github.com/theandrewgrass/gatsby-source-ravendb/issues/2) Use RavenDB 'includes' feature to query for nested documents and include them when creating nodes
 
 ---
 
-## [1.0.2] - 2022-06-29
+## [1.0.2](https://www.npmjs.com/package/gatsby-source-ravendb/v/1.0.2) - 2022-06-29
 ### Fixed
 - Resolved issue where would fail to build if trying to fetch documents from cache
-
----
-
-## [1.0.1] - 2022-06-28
->*(deleted from npm because other non-essential files were accidentally committed)*
-### Fixed
 - Resolved issue where Gatsby build process would continue without waiting for nodes to finish being created
 
 ---
 
-## [1.0.0] - 2022-06-27
+## [1.0.0](https://www.npmjs.com/package/gatsby-source-ravendb/v/1.0.0) - 2022-06-27
 ### Added
 - Basic functionality for creating nodes from documents in RavenDB collections
 - Use of etags so that previous query results can be cached for faster builds
