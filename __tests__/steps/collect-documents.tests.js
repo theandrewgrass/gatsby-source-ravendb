@@ -1,12 +1,14 @@
 const ravenClient = require('../../src/raven-client');
 const ravenCache = require('../../src/raven-cache');
 const collectDocuments = require('../../src/steps/collect-documents');
+const mapIncludes = require('../../src/steps/map-includes');
 
 const createDocument = require('../helpers/create-document');
 const mockQueryResponse = require('../helpers/mock-query-response');
 
 jest.mock('../../src/raven-client');
 jest.mock('../../src/raven-cache');
+jest.mock('../../src/steps/map-includes');
 
 describe('collect-documents', () => {
   const basicOptions = {
@@ -137,13 +139,13 @@ describe('collect-documents', () => {
       .toHaveBeenCalledWith(options.collection.node, loadedDocuments);
   });
 
-  test('should map includes to relevant documents', async() => {
+  test('should map includes if collection options have includes', async() => {
     // Arrange
     const options = {
       ...basicOptions,
       collection: {
         node: 'node',
-        includes: [ 'SomeProperty', 'SomeNested.Property', 'SomeCollection[].Property', 'SomeCollection[].Nested.Property' ],
+        includes: [ 'SomeProperty' ],
       },
       cache: {}
     };
@@ -156,19 +158,10 @@ describe('collect-documents', () => {
     };
     ravenCache.mockImplementation(() => ravenCacheMock);
 
-    const loadedDocuments = [
-      createDocument('id1', { 
-        SomeProperty: 'somePropertyId', 
-        SomeNested: { Property: 'someNestedPropertyId' },
-        SomeCollection: [ { Property: 'someCollectionPropertyId' }, { Nested: { Property: 'someNestedCollectionPropertyId' } } ]
-      }),
-    ];
+    const loadedDocuments = [ createDocument('id1') ];
 
     const loadedIncludes = {
-      somePropertyId: createDocument('somePropertyId', { someProperty: 'someValue' }),
-      someNestedPropertyId: createDocument('someNestedPropertyId', { someProperty: 'nestedValue' }),
-      someCollectionPropertyId: createDocument('someCollectionPropertyId', { someProperty: 'collectionValue' }),
-      someNestedCollectionPropertyId: createDocument('someNestedCollectionPropertyId', { someProperty: 'nestedCollectionValue' }),
+      somePropertyId: createDocument('somePropertyId', { someProperty: 'someValue' })
     };
     
     const ravenClientMock = {
@@ -176,24 +169,14 @@ describe('collect-documents', () => {
     };
     ravenClient.mockImplementation(() => ravenClientMock);
 
+    const mapIncludesMock = jest.fn();
+    mapIncludes.mockImplementation(mapIncludesMock);
+
     // Act
-    const documents = await collectDocuments(options);
+    await collectDocuments(options);
     
     // Assert
-    expect(documents)
-      .toHaveLength(1);
-
-    const document = documents[0];
-
-    expect(document.SomeProperty)
-      .toEqual(loadedIncludes.somePropertyId);
-    expect(documents[0].AnotherInclude)
-      .toEqual(loadedIncludes.anotherIncludeId);
-    expect(document.SomeNested.Property)
-      .toEqual(loadedIncludes.someNestedPropertyId);
-    expect(document.SomeCollection[0].Property)
-      .toEqual(loadedIncludes.someCollectionPropertyId);
-    expect(document.SomeCollection[1].Nested.Property)
-      .toEqual(loadedIncludes.someNestedCollectionPropertyId);
+    expect(mapIncludesMock)
+      .toHaveBeenCalledWith(loadedDocuments, loadedIncludes, options.collection.includes);
   });
 });
