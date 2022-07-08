@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-ravendb",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A Gatsby source plugin to fetch data from RavenDB",
   "authors": [
     "Andrew Grass <andygrass92@gmail.com>"
@@ -21,6 +21,11 @@
   "peerDependencies": {
     "gatsby": "^4.0.0"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/__tests__/helpers/"
+    ]
+  },
   "keywords": [
     "gatsby",
     "gatsby-plugin",
@@ -39,7 +44,7 @@
     "prepare": "cross-env NODE_ENV=production npm run build",
     "watch": "babel src --watch --out-dir .",
     "test": "jest",
-    "clean": "git clean -fx"
+    "clean": "git clean -xfd -e node_modules"
   },
   "engines": {
     "node": ">=14.15.0"

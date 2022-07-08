@@ -1,4 +1,5 @@
 node_modules/
 /*.js
+/steps/*.js
 !index.js
 *.tgz

@@ -1,15 +1,14 @@
-const ravenClient = require('./raven-client');
-const ravenQueryRequest = require('./raven-query-request');
-const utils = require('./utils');
+const collectDocuments = require('./steps/collect-documents');
+const createNodes = require('./steps/create-nodes');
 
-exports.sourceNodes = async ({
-  actions,
-  createContentDigest,
-  createNodeId,
-  reporter,
-  cache,
-}, pluginOptions) => {
-  const { createNode } = actions;
+exports.sourceNodes = async (gatsbyUtils, pluginOptions) => {
+  const {
+    actions: { createNode },
+    createContentDigest,
+    createNodeId,
+    reporter,
+    cache,
+  } = gatsbyUtils;
 
   const { 
     serverUrl, 
@@ -23,50 +22,49 @@ exports.sourceNodes = async ({
   activity.start();
 
   try {
-    const client = ravenClient(serverUrl, certificate, key);
-    
     for (const collection of collections) {
-      const etagCacheKey = utils.getEtagCacheKey(collection.node);
-      const documentsCacheKey = utils.getDocumentsCacheKey(collection.node);
+      let documents;
 
-      const cachedEtag = await cache.get(etagCacheKey);
-      const queryRequest = ravenQueryRequest(databaseName, collection.name, cachedEtag);
-
-      const response = await client.request(queryRequest);
-      let { data: { Results: documents, ResultEtag: etag } } = response;
-
-      if (cachedEtag && cachedEtag === etag) {
-        documents = await cache.get(documentsCacheKey);
-      } else {
-        await cache.set(etagCacheKey, etag);
-        await cache.set(documentsCacheKey, documents);
+      // STEP 1: Collect documents
+      try {
+        const options = {
+          serverUrl,
+          certificate,
+          key,
+          databaseName,
+          collection,
+          cache
+        };
+  
+        documents = await collectDocuments(options);
+      }
+      catch (error) {
+        reporter.error(`Something went wrong while collecting documents for the collection, ${collection.name}.`, error);
+        throw error;
       }
 
-      await Promise.all(documents.map(document => {
-        const documentId = utils.getDocumentId(document);
-        const nodeId = utils.getNodeId(collection.node, document);
-        
-        return createNode({
-          ...document,
-          _id: documentId,
-          id: createNodeId(nodeId),
-          parent: null,
-          children: [],
-          internal: {
-            type: collection.node,
-            content: JSON.stringify(document),
-            contentDigest: createContentDigest(document)
-          }
-        });
-      }));
+      // STEP 2: Create nodes
+      try {
+        const options = {
+          createNode,
+          createNodeId,
+          createContentDigest,
+          collection,
+          documents
+        };
+  
+        await createNodes(options);
+      }
+      catch (error) {
+        reporter.error(`Something went wrong while creating nodes for the collection, ${collection.name}.`, error);
+        throw error;
+      }
     }
-  } catch (err) {
-    reporter.error(`Something went wrong while sourcing data from RavenDB.`, err);
-
+  } catch (error) {
     activity.setStatus(`Failed`);
     activity.end();
 
-    throw err;
+    throw error;
   }
 
   activity.setStatus(`Completed`);

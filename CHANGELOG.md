@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-### New features
+*(nothing new upcoming)*
+
+---
+
+## [1.1.0](https://www.npmjs.com/package/gatsby-source-ravendb/v/1.1.0) - 2022-07-07
+### Added
 - [#2](https://github.com/theandrewgrass/gatsby-source-ravendb/issues/2) Use RavenDB 'includes' feature to query for nested documents and include them when creating nodes
 
 ---
