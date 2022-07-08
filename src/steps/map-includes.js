@@ -17,6 +17,7 @@ const mapIncludes = (documents, includes, collectionIncludes) => {
           if (documentPart && documentPart[includeParts[0]] && includes[documentPart[includeParts[0]]]) { // document part is defined and has a matching include and an include exists for the id in the document
             const includeId = documentPart[includeParts[0]];
             documentPart[includeParts[0]] = includes[includeId];
+            documentPart[includeParts[0]]['_id'] = includeId;
           }
           return;
         }
